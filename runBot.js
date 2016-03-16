@@ -31,7 +31,7 @@ async function likeTenTinderGirls(){
     }, 1000 * 60 * 2)
   }
 
-  let results = data.results;
+  let { results } = data
 
   let countUntil = data.results.length;
 
