@@ -4,38 +4,43 @@ import cheerio from 'cheerio'
 let FACEBOOK_PROFILE = "http://www.facebook.com/"
 let FACEBOOK_AUTHENTICATION_TOKEN_URL = 'https://www.facebook.com/dialog/oauth?client_id=464891386855067&redirect_uri=https://www.facebook.com/connect/login_success.html&scope=basic_info,email,public_profile,user_about_me,user_activities,user_birthday,user_education_history,user_friends,user_interests,user_likes,user_location,user_photos,user_relationship_details&response_type=token'
 
-let email = process.env.FACEBOOK_EMAIL
-let password = process.env.FACEBOOK_PASSWORD
+export default async function getTokenAndId(email, password){
 
-let scraped_token, profile_id;
+  email = email || process.env.FACEBOOK_EMAIL
+  password = password || process.env.FACEBOOK_PASSWORD
 
-let browser = new Browser()
+  if(!email || !password){
+      throw new Error("Define username and password via env vars")
+  }
 
-browser.on('loaded', function(){
+  let scraped_token, profile_id;
 
-    var t = browser.url.match(/#access_token=(.+)&/)
+  let browser = new Browser()
 
-    if (t && t[1]){
-        console.log(t[1])
-    }
-})
+  browser.on('loaded', function(){
 
-browser.visit(FACEBOOK_AUTHENTICATION_TOKEN_URL, function () {
+      var t = browser.url.match(/#access_token=(.+)&/)
 
-    browser.fill('#email', email).fill('#pass', password).pressButton('#loginbutton', function(){
+      if (t && t[1]){
+          scraped_token = t[1];
+          console.log(scraped_token)
+      }
+  })
 
-        browser.visit(FACEBOOK_PROFILE, function(){
+  await browser.visit(FACEBOOK_AUTHENTICATION_TOKEN_URL)
 
-            let $ = cheerio.load(browser.html())
+  browser.fill('#email', email).fill('#pass', password)
 
-            var profile_id = $('[title=Profile]').attr('href')
+  await browser.pressButton('#loginbutton')
 
-            let profile_id_number = profile_id.match(/profile.php\?id=(.+)/)
+  await browser.visit(FACEBOOK_PROFILE)
 
-            console.log(profile_id_number[1])
+  let $ = cheerio.load(browser.html())
 
-        })
+  let profile_id_element = $('[title=Profile]').attr('href')
 
-    })
- 
-});
+  profile_id = profile_id_element.match(/profile.php\?id=(.+)/)[1]
+
+  return { scraped_token, profile_id }
+}
+
