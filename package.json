@@ -1,0 +1,18 @@
+{
+  "name": "tinderjsdev",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "./node_modules/.bin/babel-node runBot.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Anthony Mayfield <anthony@onthebrinkbook.com> (http://www.anthonymayfield.com/)",
+  "license": "ISC",
+  "dependencies": {
+    "babel": "^5.6.14",
+    "bluebird": "^3.3.4",
+    "lodash": "^4.6.1",
+    "tinderjs": "^1.0.8"
+  }
+}
