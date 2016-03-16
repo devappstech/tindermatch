@@ -23,7 +23,6 @@ export default async function getTokenAndId(email, password){
 
       if (t && t[1]){
           scraped_token = t[1];
-          console.log(scraped_token)
       }
   })
 
