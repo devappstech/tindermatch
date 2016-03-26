@@ -1,13 +1,17 @@
 import tinder from 'tinderjs';
 import Promise from 'bluebird';
 import _ from 'lodash';
+import tinderauth from 'tinderauth';
+
+process.on('unhandledRejection', console.log)
 
 const client = Promise.promisifyAll(new tinder.TinderClient());
 
-const fbid = process.env.FACEBOOK_ID;
-const fbtoken = process.env.FACEBOOK_TOKEN;
+const email = process.env.FACEBOOK_EMAIL
+const password = process.env.FACEBOOK_PASSWORD
 
-process.on('unhandledRejection', console.log)
+let fbid = process.env.FACEBOOK_ID;
+let fbtoken = process.env.FACEBOOK_TOKEN;
 
 function getYearsOld(girlsBirthday){
   let todaysDate = new Date();
@@ -60,6 +64,17 @@ async function likeTenTinderGirls(){
   })
 }
 
-client.authorize(fbtoken, fbid, async function(){
-  likeTenTinderGirls()
-});
+async function main(){
+
+  if(!fbid || !fbtoken){
+    const { fbtoken, fbid } = await tinderauth(email, password);
+    console.log(fbtoken, fbid);
+  }
+
+  client.authorize(fbtoken, fbid, async function(){
+    likeTenTinderGirls()
+  });
+
+}
+
+main()
