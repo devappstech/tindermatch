@@ -1,4 +1,4 @@
-import tinder from 'tinder';
+import tinder from 'tinderjs';
 import Promise from 'bluebird';
 import _ from 'lodash';
 import tinderauth from 'tinderauth';
