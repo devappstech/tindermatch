@@ -10,6 +10,7 @@ const client = Promise.promisifyAll(new tinder.TinderClient());
 
 const email = process.env.FACEBOOK_EMAIL
 const password = process.env.FACEBOOK_PASSWORD
+const myTinderId = process.env.TINDER_ID
 
 let fbid = process.env.FACEBOOK_ID;
 let fbtoken = process.env.FACEBOOK_TOKEN;
@@ -21,23 +22,12 @@ let fbtoken = process.env.FACEBOOK_TOKEN;
 async function sayHelloToFirstMatch(){
   // let response = await client.getHistoryAsync();
 
-  // let id = response.matches[0].person._id;
-  
-  // match #1
-  // let id = '56de1e897f895bb236edb6f556e368dfeb38e5433cdc5f1c';
-  
-  // match #2
-  // let id = '56d4eefe1c81d6ff37328d5756e368dfeb38e5433cdc5f1c';
-  
-  // match #3
-  let id = '5651239f1bc38f083c19f03356e368dfeb38e5433cdc5f1c';
-
   let response = await client.sendMessageAsync(id, `Hey, how are you! ${emoji.get('blush')}`);
 
   console.log(response);
 }
 
-async function getHistoryDate(){
+async function getHistoryData(){
 
   let data = await client.getHistoryAsync();
 
@@ -73,7 +63,7 @@ async function main(){
   // }
 
   client.authorize(fbtoken, fbid, async function(){
-    getHistoryDate()
+    getHistoryData()
   });
 
 }
