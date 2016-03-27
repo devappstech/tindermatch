@@ -4,7 +4,6 @@ import _ from 'lodash';
 import tinderauth from 'tinderauth';
 import emoji from 'node-emoji'
 import Cleverbot from 'cleverbot-node'
-import Promise from 'bluebird';
 
 /*    Initialization      */
 
@@ -61,15 +60,17 @@ async function getHistoryData(){
 
 
 
-async function sayHelloToMatches(){
+async function runMessageSendingFunctionality(){
 
   let data = await client.getHistoryAsync();
 
-  let { matches } = data
+  await cleverbotPrepareAsync();
 
-  _.forEach(response.matches, function(match, number){
-    let timeout = number * 1000
-    let messages = match.messages
+  let { matches } = data;
+
+  _.forEach(matches, function(match, number){
+    let timeout = number * 1000;
+    let messages = match.messages;
 
     setTimeout(async function(){
 
@@ -77,21 +78,24 @@ async function sayHelloToMatches(){
       if(messages.length){
         let lastMessage = messages.last();
 
-        if(lastMessage.from == myId){
+        // I said last thing
+        if(lastMessage.from == myTinderId){
           console.log('I sent the last message, nothing I can do here')
+        // they said last thing
         } else {
           console.log('Send it to Cleverbot!')
           let messageToSendToCleverbot = lastMessage.message;
-          // let cleverbotResponse = await cleverbotWriteAsync(messageToSendToCleverbot); 
-          // console.log(`To the message of ${messageToSendToCleverbot}, cleverbot says ${cleverbotResponse.message}`) 
-          // let sendMessageResponse = await client.sendMessageAsync(match._id, cleverbotResponse.message);
-          // console.log(sendMessageResponse)
+          let cleverbotResponse = await cleverbotWriteAsync(messageToSendToCleverbot); 
+          console.log(`To the message of ${messageToSendToCleverbot}, cleverbot says ${cleverbotResponse.message}`) 
+          let sendMessageResponse = await client.sendMessageAsync(match._id, cleverbotResponse.message);
+          console.log(sendMessageResponse)
         }
 
+      // no one has said anything yet, initiate conversation
       } else {
         console.log('No messages yet, fire the vanilla opener!')
-        // let sendMessageResponse = await client.sendMessageAsync(match._id, boilerplate);
-        // console.log(sendMessageResponse)
+        let sendMessageResponse = await client.sendMessageAsync(match._id, boilerplateMessage);
+        console.log(sendMessageResponse)
       }
       
     }, timeout)
@@ -109,7 +113,7 @@ async function main(){
   // }
 
   client.authorize(fbtoken, fbid, async function(){
-    getHistoryData()
+    runMessageSendingFunctionality()
   });
 
 }
