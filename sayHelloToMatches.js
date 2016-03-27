@@ -1,10 +1,14 @@
-import tinder from 'tinderjs';
+import tinder from 'tinder';
 import Promise from 'bluebird';
 import _ from 'lodash';
 import tinderauth from 'tinderauth';
 import emoji from 'node-emoji'
+import Cleverbot from 'cleverbot-node'
+import Promise from 'bluebird';
 
-process.on('unhandledRejection', console.log)
+/*    Initialization      */
+
+const cleverbot = new Cleverbot;
 
 const client = Promise.promisifyAll(new tinder.TinderClient());
 
@@ -15,14 +19,35 @@ const myTinderId = process.env.TINDER_ID
 let fbid = process.env.FACEBOOK_ID;
 let fbtoken = process.env.FACEBOOK_TOKEN;
 
-// used emojis:
-// emoji.get('relaxed') <-- best
-// emoji.get('blush') 
+
+function cleverbotWriteAsync(message){
+    return new Promise(function(resolve, reject){
+        cleverbot.write(message, resolve, reject);
+    });
+}
+
+function cleverbotPrepareAsync(){
+    return new Promise(function(resolve, reject){
+        Cleverbot.prepare(resolve, reject);
+    });
+}
+
+Array.prototype.last = function() {
+    return this[this.length-1];
+}
+
+process.on('unhandledRejection', console.log)
+
+/*       Actual Functionality      */
+
+
+// boilerplate message
+const boilerplateMessage = `Hey, how are you! You're really cute ${emoji.get('blush')}`;
 
 async function sayHelloToFirstMatch(){
   // let response = await client.getHistoryAsync();
 
-  let response = await client.sendMessageAsync(id, `Hey, how are you! ${emoji.get('blush')}`);
+  let response = await client.sendMessageAsync(id, `Hey, how are you! You're really cute ${emoji.get('blush')}`);
 
   console.log(response);
 }
@@ -42,16 +67,37 @@ async function sayHelloToMatches(){
 
   let { matches } = data
 
-  _.forEach(matches, function(girl, number){
-    let timeout = number * 5000
+  _.forEach(response.matches, function(match, number){
+    let timeout = number * 1000
+    let messages = match.messages
 
     setTimeout(async function(){
 
-      // send message here
-      // 
+      // conversation has been initiated
+      if(messages.length){
+        let lastMessage = messages.last();
+
+        if(lastMessage.from == myId){
+          console.log('I sent the last message, nothing I can do here')
+        } else {
+          console.log('Send it to Cleverbot!')
+          let messageToSendToCleverbot = lastMessage.message;
+          // let cleverbotResponse = await cleverbotWriteAsync(messageToSendToCleverbot); 
+          // console.log(`To the message of ${messageToSendToCleverbot}, cleverbot says ${cleverbotResponse.message}`) 
+          // let sendMessageResponse = await client.sendMessageAsync(match._id, cleverbotResponse.message);
+          // console.log(sendMessageResponse)
+        }
+
+      } else {
+        console.log('No messages yet, fire the vanilla opener!')
+        // let sendMessageResponse = await client.sendMessageAsync(match._id, boilerplate);
+        // console.log(sendMessageResponse)
+      }
       
     }, timeout)
+
   })
+
 }
 
 
